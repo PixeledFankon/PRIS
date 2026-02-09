@@ -1,42 +1,29 @@
 
 import streamlit as st
-from mock_data import test_entity as default_data
-from logic import check_rules
+import matplotlib.pyplot as plt
+import networkx as nx
 
-st.title("Rule-Based System Debugger")
-st.write("Настрой входные данные и нажми кнопку.")
+from logic import MetaLogic
+from knowledge_graph import CreateGraph, FindRelatedEntities
 
-metric_value = st.sidebar.number_input(
-    "Метрика (число):",
-    value=int(default_data["metric_value"])
-)
+meta = MetaLogic()
 
-is_verified = st.sidebar.checkbox(
-    "Объект верифицирован (True/False):",
-    value=bool(default_data["is_verified"])
-)
+st.title("Проверка меты")
 
-tags_text = st.sidebar.text_input(
-    "Теги (через запятую):",
-    value=",".join(default_data["tags_list"])
-)
+st.divider()
+st.title("Knowledge Graph Explorer")
 
-tags_list = [t.strip() for t in tags_text.split(",") if t.strip()]
+G = CreateGraph(meta.rules)
+allNodes = list(G.nodes())
+selectedNode = st.selectbox("Выберите узел:", allNodes)
 
-if st.button("Запустить проверку"):
-    current_test_data = {
-        "category_text": default_data["category_text"],
-        "metric_value": metric_value,
-        "tags_list": tags_list,
-        "is_verified": is_verified
-    }
+if st.button("Найти связи"):
+    neighbors = FindRelatedEntities(G, selectedNode)
+    st.success(f"Узел '{selectedNode}' связан с: {', '.join(map(str, neighbors))}")
 
-    result = check_rules(current_test_data)
-
-    if result.startswith("SUCCESS"):
-        st.success(result)
-    elif result.startswith("CRITICAL") or result.startswith("ERROR"):
-        st.error(result)
-    else:
-        st.warning(result)
+st.write("Визуализация графа")
+fig, ax = plt.subplots(figsize=(10, 6))
+pos = nx.spring_layout(G)
+nx.draw(G, pos, with_labels=True, node_size=2000, font_size=9, ax=ax)
+st.pyplot(fig)
 

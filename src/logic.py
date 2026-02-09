@@ -1,33 +1,40 @@
 
 import json
-import os
+from pathlib import Path
 
+RULES_PATH = Path(__file__).parent.parent / "data" / "raw" / "rules.json"
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RULES_PATH = os.path.join(BASE_DIR, "data", "raw", "rules.json")
+class MetaLogic:
+    def __init__(self):
+        with open(RULES_PATH, "r", encoding="utf-8") as f:
+            self.rules = json.load(f)
 
+    def GetTier(self, heroClass):
+        return self.rules["tiers"].get(heroClass, "Unknown")
 
-def load_rules():
-    with open(RULES_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+    def IsCounter(self, attacker, defender):
+        return defender in self.rules["counters"].get(attacker, [])
 
+    def IsStrongPick(self, heroClass):
+        tier = self.GetTier(heroClass)
+        return tier in self.rules["meta_thresholds"]["strong_pick"]
 
-def check_rules(data: dict) -> str:
-    rules = load_rules()
+def EvaluateMeta(entity, metaLogic):
+    hero = entity["hero_class"]
+    enemies = entity.get("enemy_classes", [])
 
-    if rules["critical_rules"]["must_be_verified"] and not data["is_verified"]:
-        return "Критическая ошибка: объект не верифицирован"
+    tier = metaLogic.GetTier(hero)
 
-    min_v = rules["thresholds"]["min_value"]
-    max_v = rules["thresholds"]["max_value"]
+    countered = any(
+        metaLogic.IsCounter(enemy, hero)
+        for enemy in enemies
+    )
 
-    if data["metric_value"] < min_v:
-        return f"Отказ: значение ниже минимума ({data['metric_value']} < {min_v})"
-    if data["metric_value"] > max_v:
-        return f"Отказ: значение выше максимума ({data['metric_value']} > {max_v})"
+    strong_pick = metaLogic.IsStrongPick(hero)
 
-    for tag in data["tags_list"]:
-        if tag in rules["lists"]["blacklist"]:
-            return f"Предупреждение: найден запрещённый тег ({tag})"
-
-    return f"Успех: объект соответствует сценарию '{rules['scenario_name']}'"
+    return {
+        "hero": hero,
+        "tier": tier,
+        "is_countered": countered,
+        "is_strong_pick": strong_pick
+    }

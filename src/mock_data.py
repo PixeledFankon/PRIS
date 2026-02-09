@@ -1,7 +1,9 @@
 
 test_entity = {
-    "category_text": "значение_1",
-    "metric_value": 50,
-    "tags_list": ["tag_a", "tag_b", "tag_c"],
-    "is_verified": False
+    "hero_class": "Mage",
+    "enemy_classes": ["Assassin", "Tank"],
+    "patch": "1.2.0",
+    "player_role": "Mid",
+    "items": ["Magic Staff", "Mana Boots"],
+    "is_ranked": True
 }
