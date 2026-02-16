@@ -1,40 +1,109 @@
 
-import json
-from pathlib import Path
+from ClassHero import ClassHero
 
-RULES_PATH = Path(__file__).parent.parent / "data" / "raw" / "rules.json"
 
-class MetaLogic:
-    def __init__(self):
-        with open(RULES_PATH, "r", encoding="utf-8") as f:
-            self.rules = json.load(f)
+def CreateHeroes():
+    return [
+        ClassHero("Ares", "blue", "warrior", "melee"),
+        ClassHero("Blaze", "red", "mage", "ranged"),
+        ClassHero("Cora", "green", "marksman", "artillery"),
+        ClassHero("Drax", "blue", "marksman", "ranged"),
+        ClassHero("Ezra", "red", "warrior", "melee"),
+        ClassHero("Faye", "green", "mage", "artillery"),
+    ]
 
-    def GetTier(self, heroClass):
-        return self.rules["tiers"].get(heroClass, "Unknown")
 
-    def IsCounter(self, attacker, defender):
-        return defender in self.rules["counters"].get(attacker, [])
+def FactionScore(a, b):
+    if a.Faction == "blue" and b.Faction == "red":
+        return 1
+    if a.Faction == "red" and b.Faction == "green":
+        return 1
+    if a.Faction == "green" and b.Faction == "blue":
+        return 1
 
-    def IsStrongPick(self, heroClass):
-        tier = self.GetTier(heroClass)
-        return tier in self.rules["meta_thresholds"]["strong_pick"]
+    if b.Faction == "blue" and a.Faction == "red":
+        return -1
+    if b.Faction == "red" and a.Faction == "green":
+        return -1
+    if b.Faction == "green" and a.Faction == "blue":
+        return -1
 
-def EvaluateMeta(entity, metaLogic):
-    hero = entity["hero_class"]
-    enemies = entity.get("enemy_classes", [])
+    return 0
 
-    tier = metaLogic.GetTier(hero)
 
-    countered = any(
-        metaLogic.IsCounter(enemy, hero)
-        for enemy in enemies
-    )
+def RoleScore(a, b):
+    if a.Role == "warrior" and b.Role == "marksman":
+        return 1
+    if a.Role == "marksman" and b.Role == "mage":
+        return 1
+    if a.Role == "mage" and b.Role == "warrior":
+        return 1
 
-    strong_pick = metaLogic.IsStrongPick(hero)
+    if b.Role == "warrior" and a.Role == "marksman":
+        return -1
+    if b.Role == "marksman" and a.Role == "mage":
+        return -1
+    if b.Role == "mage" and a.Role == "warrior":
+        return -1
 
-    return {
-        "hero": hero,
-        "tier": tier,
-        "is_countered": countered,
-        "is_strong_pick": strong_pick
-    }
+    return 0
+
+
+def AttackScore(a, b):
+    if a.AttackType == "melee" and b.AttackType == "ranged":
+        return 1
+    if a.AttackType == "ranged" and b.AttackType == "artillery":
+        return 1
+    if a.AttackType == "artillery" and b.AttackType == "melee":
+        return 1
+
+    if b.AttackType == "melee" and a.AttackType == "ranged":
+        return -1
+    if b.AttackType == "ranged" and a.AttackType == "artillery":
+        return -1
+    if b.AttackType == "artillery" and a.AttackType == "melee":
+        return -1
+
+    return 0
+
+
+def CompareHeroes(hero, other):
+    score = 0
+    score += FactionScore(hero, other)
+    score += RoleScore(hero, other)
+    score += AttackScore(hero, other)
+    return score
+
+
+def EvaluateHero(hero, allHeroes):
+    totalScore = 0
+    details = []
+
+    for other in allHeroes:
+        if other.Name == hero.Name:
+            continue
+
+        result = CompareHeroes(hero, other)
+        totalScore += result
+
+        if result > 0:
+            status = "хорош"
+        elif result < 0:
+            status = "плох"
+        else:
+            status = "средний"
+
+        details.append((other.Name, status))
+
+    return totalScore, details
+
+
+def MetaRanking(allHeroes):
+    scores = []
+
+    for hero in allHeroes:
+        score, _ = EvaluateHero(hero, allHeroes)
+        scores.append((hero, score))
+
+    scores.sort(key=lambda x: x[1], reverse=True)
+    return scores

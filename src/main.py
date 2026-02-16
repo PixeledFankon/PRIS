@@ -1,29 +1,43 @@
 
 import streamlit as st
-import matplotlib.pyplot as plt
-import networkx as nx
+from logic import CreateHeroes, EvaluateHero, MetaRanking
 
-from logic import MetaLogic
-from knowledge_graph import CreateGraph, FindRelatedEntities
+st.set_page_config(page_title="Meta Bot", page_icon="🤖")
 
-meta = MetaLogic()
+st.title("Meta Analyzer Bot")
 
-st.title("Проверка меты")
+heroes = CreateHeroes()
 
-st.divider()
-st.title("Knowledge Graph Explorer")
+if "step" not in st.session_state:
+    st.session_state.step = 0
 
-G = CreateGraph(meta.rules)
-allNodes = list(G.nodes())
-selectedNode = st.selectbox("Выберите узел:", allNodes)
+if st.session_state.step == 0:
+    st.write("Салам Алейкум ! Я анализирую положение героев в мете .")
+    if st.button("Начать"):
+        st.session_state.step = 1
 
-if st.button("Найти связи"):
-    neighbors = FindRelatedEntities(G, selectedNode)
-    st.success(f"Узел '{selectedNode}' связан с: {', '.join(map(str, neighbors))}")
 
-st.write("Визуализация графа")
-fig, ax = plt.subplots(figsize=(10, 6))
-pos = nx.spring_layout(G)
-nx.draw(G, pos, with_labels=True, node_size=2000, font_size=9, ax=ax)
-st.pyplot(fig)
+elif st.session_state.step == 1:
+    st.write("Бот : О состоянии в мете какого героя вы хотите узнать ?")
 
+    hero = st.selectbox("Выберите героя", heroes, format_func=lambda x: x.Name)
+
+    if st.button("Проверить"):
+        score, details = EvaluateHero(hero, heroes)
+        ranking = MetaRanking(heroes)
+
+        position = [h[0].Name for h in ranking].index(hero.Name) + 1
+
+        st.write(f"Вот место героя в мете : {position} из {len(heroes)}")
+        st.write(f"Общий балл: {score}")
+
+        st.write("Против кого он:")
+        for name, status in details:
+            st.write(f"- {name}: {status}")
+
+        st.session_state.step = 2
+
+
+elif st.session_state.step == 2:
+    if st.button("Анализировать другого героя"):
+        st.session_state.step = 1
