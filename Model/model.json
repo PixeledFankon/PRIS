@@ -1,0 +1,322 @@
+{
+    "Ares": {
+        "winrate_team_vs_team": 0.75,
+        "winrate_duel": 0.444,
+        "avg_boss_damage": 16661.7,
+        "best_allies": [
+            "Freya",
+            "Cora",
+            "Lola"
+        ],
+        "best_against": [
+            "Blaze",
+            "Cora",
+            "Lowrance"
+        ],
+        "worst_against": [
+            "Cora",
+            "Sora",
+            "Ezra"
+        ]
+    },
+    "Blaze": {
+        "winrate_team_vs_team": 0.462,
+        "winrate_duel": 0.625,
+        "avg_boss_damage": 17283.8,
+        "best_allies": [
+            "Sora",
+            "Roland",
+            "Freya"
+        ],
+        "best_against": [
+            "Drax",
+            "Sora",
+            "Lola"
+        ],
+        "worst_against": [
+            "Ares",
+            "Lola",
+            "Grom"
+        ]
+    },
+    "Cora": {
+        "winrate_team_vs_team": 0.583,
+        "winrate_duel": 0.25,
+        "avg_boss_damage": 16550.0,
+        "best_allies": [
+            "Ares",
+            "Hizuna",
+            "Blaze"
+        ],
+        "best_against": [
+            "Faye",
+            "Drax",
+            "Sora"
+        ],
+        "worst_against": [
+            "Ares",
+            "Lowrance",
+            "Sora"
+        ]
+    },
+    "Drax": {
+        "winrate_team_vs_team": 0.333,
+        "winrate_duel": 0.375,
+        "avg_boss_damage": 16661.7,
+        "best_allies": [
+            "Sora",
+            "Blaze",
+            "Lowrance"
+        ],
+        "best_against": [
+            "Freya",
+            "Hizuna",
+            "Kira"
+        ],
+        "worst_against": [
+            "Blaze",
+            "Ares",
+            "Lola"
+        ]
+    },
+    "Ezra": {
+        "winrate_team_vs_team": 0.522,
+        "winrate_duel": 0.286,
+        "avg_boss_damage": 17488.3,
+        "best_allies": [
+            "Lola",
+            "Hizuna",
+            "Blaze"
+        ],
+        "best_against": [
+            "Drax",
+            "Faye",
+            "Hizuna"
+        ],
+        "worst_against": [
+            "Asriel",
+            "Ares",
+            "Kira"
+        ]
+    },
+    "Faye": {
+        "winrate_team_vs_team": 0.385,
+        "winrate_duel": 0.0,
+        "avg_boss_damage": 16285.0,
+        "best_allies": [
+            "Drax",
+            "Razor",
+            "Grom"
+        ],
+        "best_against": [
+            "Grom",
+            "Hizuna",
+            "Roland"
+        ],
+        "worst_against": [
+            "Cora",
+            "Ezra",
+            "Ares"
+        ]
+    },
+    "Razor": {
+        "winrate_team_vs_team": 0.533,
+        "winrate_duel": 0.333,
+        "avg_boss_damage": 17007.5,
+        "best_allies": [
+            "Kira",
+            "Grom",
+            "Faye"
+        ],
+        "best_against": [
+            "Freya",
+            "Ezra",
+            "Lowrance"
+        ],
+        "worst_against": [
+            "Kira",
+            "Asriel",
+            "Freya"
+        ]
+    },
+    "Hizuna": {
+        "winrate_team_vs_team": 0.35,
+        "winrate_duel": 0.714,
+        "avg_boss_damage": 16824.5,
+        "best_allies": [
+            "Cora",
+            "Grom",
+            "Ezra"
+        ],
+        "best_against": [
+            "Faye",
+            "Sora",
+            "Grom"
+        ],
+        "worst_against": [
+            "Asriel",
+            "Ezra",
+            "Lowrance"
+        ]
+    },
+    "Grom": {
+        "winrate_team_vs_team": 0.379,
+        "winrate_duel": 0.625,
+        "avg_boss_damage": 16224.3,
+        "best_allies": [
+            "Hizuna",
+            "Asriel",
+            "Cora"
+        ],
+        "best_against": [
+            "Blaze",
+            "Drax",
+            "Kira"
+        ],
+        "worst_against": [
+            "Freya",
+            "Sora",
+            "Kira"
+        ]
+    },
+    "Kira": {
+        "winrate_team_vs_team": 0.583,
+        "winrate_duel": 0.571,
+        "avg_boss_damage": 16752.5,
+        "best_allies": [
+            "Roland",
+            "Freya",
+            "Asriel"
+        ],
+        "best_against": [
+            "Grom",
+            "Razor",
+            "Freya"
+        ],
+        "worst_against": [
+            "Freya",
+            "Lowrance",
+            "Ares"
+        ]
+    },
+    "Asriel": {
+        "winrate_team_vs_team": 0.571,
+        "winrate_duel": 0.75,
+        "avg_boss_damage": 16678.0,
+        "best_allies": [
+            "Grom",
+            "Roland",
+            "Kira"
+        ],
+        "best_against": [
+            "Hizuna",
+            "Grom",
+            "Lowrance"
+        ],
+        "worst_against": [
+            "Roland",
+            "Lola",
+            "Freya"
+        ]
+    },
+    "Freya": {
+        "winrate_team_vs_team": 0.52,
+        "winrate_duel": 0.875,
+        "avg_boss_damage": 18052.7,
+        "best_allies": [
+            "Ares",
+            "Blaze",
+            "Kira"
+        ],
+        "best_against": [
+            "Grom",
+            "Kira",
+            "Lowrance"
+        ],
+        "worst_against": [
+            "Ares",
+            "Kira",
+            "Razor"
+        ]
+    },
+    "Roland": {
+        "winrate_team_vs_team": 0.5,
+        "winrate_duel": 0.875,
+        "avg_boss_damage": 16871.5,
+        "best_allies": [
+            "Blaze",
+            "Kira",
+            "Asriel"
+        ],
+        "best_against": [
+            "Lola",
+            "Grom",
+            "Asriel"
+        ],
+        "worst_against": [
+            "Kira",
+            "Lola",
+            "Sora"
+        ]
+    },
+    "Lowrance": {
+        "winrate_team_vs_team": 0.455,
+        "winrate_duel": 0.143,
+        "avg_boss_damage": 17940.9,
+        "best_allies": [
+            "Freya",
+            "Drax",
+            "Sora"
+        ],
+        "best_against": [
+            "Cora",
+            "Kira",
+            "Hizuna"
+        ],
+        "worst_against": [
+            "Ares",
+            "Asriel",
+            "Freya"
+        ]
+    },
+    "Lola": {
+        "winrate_team_vs_team": 0.524,
+        "winrate_duel": 0.143,
+        "avg_boss_damage": 16754.5,
+        "best_allies": [
+            "Ezra",
+            "Ares",
+            "Roland"
+        ],
+        "best_against": [
+            "Blaze",
+            "Drax",
+            "Asriel"
+        ],
+        "worst_against": [
+            "Roland",
+            "Asriel",
+            "Sora"
+        ]
+    },
+    "Sora": {
+        "winrate_team_vs_team": 0.522,
+        "winrate_duel": 0.75,
+        "avg_boss_damage": 17274.0,
+        "best_allies": [
+            "Blaze",
+            "Drax",
+            "Ares"
+        ],
+        "best_against": [
+            "Grom",
+            "Lowrance",
+            "Lola"
+        ],
+        "worst_against": [
+            "Blaze",
+            "Roland",
+            "Cora"
+        ]
+    }
+}
