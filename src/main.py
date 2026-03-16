@@ -1,70 +1,124 @@
 
-import os
-import csv
 import streamlit as st
-from logic import get_hero_stats
 
-BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-HEROES_CSV = os.path.join(BASE_PATH, "..", "data", "raw", "HeroesList.csv")
-MODEL_JSON = os.path.join(BASE_PATH, "..", "Model", "model.json")
-
-
-def load_hero_names() -> list[str]:
-    heroes = []
-    with open(HEROES_CSV, encoding="utf-8", newline="") as f:
-        reader = csv.DictReader(f, delimiter=";")
-        for row in reader:
-            name = (row.get("Name") or "").strip()
-            if name:
-                heroes.append(name)
-    return heroes
+from logic import (
+    GetBosses,
+    GetHeroes,
+    PredictBossBattle,
+    PredictDuel,
+    PredictTeamBattle
+)
 
 
-def fmt_percent(value: float) -> str:
-    return f"{value * 100:.1f}%"
+st.set_page_config(page_title="PRIS Battle Predictor", page_icon="⚔️", layout="centered")
+st.title("PRIS: Battle Predictor")
 
-
-st.set_page_config(page_title="PRIS Heroes", page_icon="🧠", layout="centered")
-st.title("PRIS: Герои и статистика")
-
-if not os.path.exists(HEROES_CSV):
-    st.error(f"Не найден {HEROES_CSV}")
+try:
+    heroes = GetHeroes()
+    bosses = GetBosses()
+except Exception as error:
+    st.error(str(error))
+    st.info("Сначала обучи модели командой: python src/Training.py")
     st.stop()
 
-if not os.path.exists(MODEL_JSON):
-    st.warning(
-        "Модель не найдена. Сначала обучи:\n\n"
-        "```bash\npython src/Training.py\n```"
-    )
+if not heroes:
+    st.error("Список героев пуст.")
     st.stop()
 
-heroes = load_hero_names()
-selected = st.selectbox("Выбери героя", heroes)
-
-stats = get_hero_stats(selected)
-if stats is None:
-    st.error("Нет данных по герою в model.json. Переобучи Training.py.")
-    st.stop()
-
-c1, c2, c3 = st.columns(3)
-c1.metric("WinRate Team vs Team", fmt_percent(stats["winrate_team_vs_team"]))
-c2.metric("WinRate Duel", fmt_percent(stats["winrate_duel"]))
-c3.metric("Avg Boss Damage", f"{stats['avg_boss_damage']}")
+mode = st.radio(
+    "Выбери режим",
+    ["1v1", "3v1 Boss", "3v3 Team Battle"],
+    horizontal=True
+)
 
 st.divider()
 
-a1, a2, a3 = st.columns(3)
-with a1:
-    st.subheader("Лучшие союзники")
-    for i, h in enumerate(stats["best_allies"], start=1):
-        st.write(f"{i}. {h}")
+if mode == "1v1":
+    st.subheader("Дуэль 1 на 1")
 
-with a2:
-    st.subheader("Против кого хорош")
-    for i, h in enumerate(stats["best_against"], start=1):
-        st.write(f"{i}. {h}")
+    col1, col2 = st.columns(2)
 
-with a3:
-    st.subheader("Против кого плох")
-    for i, h in enumerate(stats["worst_against"], start=1):
-        st.write(f"{i}. {h}")
+    with col1:
+        hero1 = st.selectbox("Твой герой", heroes, key="duel_hero_1")
+
+    with col2:
+        availableEnemies = [hero for hero in heroes if hero != hero1]
+        hero2 = st.selectbox("Противник", availableEnemies, key="duel_hero_2")
+
+    if st.button("Рассчитать дуэль"):
+        try:
+            probability = PredictDuel(hero1, hero2)
+            st.metric("Шанс победы первого героя", f"{probability * 100:.2f}%")
+            st.caption(f"{hero1} vs {hero2}")
+        except Exception as error:
+            st.error(str(error))
+
+elif mode == "3v1 Boss":
+    st.subheader("Битва с боссом")
+
+    team = st.multiselect(
+        "Выбери 3 разных героев",
+        heroes,
+        max_selections=3,
+        key="boss_team"
+    )
+
+    selectedBoss = None
+    if bosses:
+        selectedBoss = st.selectbox("Выбери босса", bosses, key="boss_name")
+
+    if st.button("Рассчитать урон по боссу"):
+        try:
+            if len(team) != 3:
+                st.error("Нужно выбрать ровно 3 героев")
+                st.stop()
+
+            predictedDamage = PredictBossBattle(team, selectedBoss)
+            st.metric("Прогнозируемый урон", f"{predictedDamage:.1f}")
+
+            teamText = ", ".join(team)
+            if selectedBoss:
+                st.caption(f"Команда: {teamText} | Босс: {selectedBoss}")
+            else:
+                st.caption(f"Команда: {teamText}")
+        except Exception as error:
+            st.error(str(error))
+
+elif mode == "3v3 Team Battle":
+    st.subheader("Командный бой 3 на 3")
+
+    st.markdown("### Команда 1")
+    team1 = st.multiselect(
+        "Выбери 3 героев для первой команды",
+        heroes,
+        max_selections=3,
+        key="team1"
+    )
+
+    st.markdown("### Команда 2")
+    team2 = st.multiselect(
+        "Выбери 3 героев для второй команды",
+        heroes,
+        max_selections=3,
+        key="team2"
+    )
+
+    if st.button("Рассчитать командный бой"):
+        try:
+            if len(team1) != 3:
+                st.error("В первой команде должно быть ровно 3 героя")
+                st.stop()
+
+            if len(team2) != 3:
+                st.error("Во второй команде должно быть ровно 3 героя")
+                st.stop()
+
+            probability = PredictTeamBattle(team1, team2)
+
+            st.metric("Шанс победы команды 1", f"{probability * 100:.2f}%")
+            st.metric("Шанс победы команды 2", f"{(1 - probability) * 100:.2f}%")
+
+            st.caption(f"Команда 1: {', '.join(team1)}")
+            st.caption(f"Команда 2: {', '.join(team2)}")
+        except Exception as error:
+            st.error(str(error))

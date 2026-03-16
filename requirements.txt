@@ -4,3 +4,5 @@ notebook
 notebookopencv-python-headless
 matplotlib
 networkx
+scikit-learn
+joblib
