@@ -16,6 +16,7 @@ HEROES_LIST_PATH = os.path.join(DATA_PATH, "HeroesList.csv")
 DUELS_PATH = os.path.join(DATA_PATH, "HeroVersusHero.csv")
 TEAM_BATTLE_PATH = os.path.join(DATA_PATH, "TeamVersusTeam.csv")
 BOSS_BATTLE_PATH = os.path.join(DATA_PATH, "TeamVersusBoss.csv")
+WAVES_PATH = os.path.join(DATA_PATH, "TeamVersusWaves.csv")
 
 
 def ParseTeam(teamStr: str) -> List[str]:
@@ -103,6 +104,15 @@ def EncodeBossBattle(
     return features
 
 
+def EncodeWavesTeam(team: List[str], heroIndex: Dict[str, int]) -> List[int]:
+    features = [0] * len(heroIndex)
+
+    for hero in team:
+        features[heroIndex[hero]] += 1
+
+    return features
+
+
 def TrainDuelModel(heroes: List[str]) -> LogisticRegression:
     heroIndex = MakeHeroIndex(heroes)
     xTrain: List[List[int]] = []
@@ -119,13 +129,11 @@ def TrainDuelModel(heroes: List[str]) -> LogisticRegression:
             if hero1 not in heroIndex or hero2 not in heroIndex:
                 continue
 
-            # label = 1, если победил Hero1
             label = 1 if result == hero1 else 0
 
             xTrain.append(EncodeDuel(hero1, hero2, heroIndex))
             yTrain.append(label)
 
-            # Добавляем зеркальный пример для устойчивости
             reverseLabel = 1 if result == hero2 else 0
             xTrain.append(EncodeDuel(hero2, hero1, heroIndex))
             yTrain.append(reverseLabel)
@@ -156,7 +164,6 @@ def TrainTeamBattleModel(heroes: List[str]) -> LogisticRegression:
             xTrain.append(EncodeTeamBattle(team1, team2, heroIndex))
             yTrain.append(label)
 
-            # Зеркальный пример
             reverseLabel = 1 if result == "Team2" else 0
             xTrain.append(EncodeTeamBattle(team2, team1, heroIndex))
             yTrain.append(reverseLabel)
@@ -199,6 +206,46 @@ def TrainBossModel(heroes: List[str], bosses: List[str]) -> Ridge:
     return model
 
 
+def TrainWavesModel(heroes: List[str]) -> Ridge:
+    if not os.path.exists(WAVES_PATH):
+        raise FileNotFoundError("Не найден data/raw/TeamVersusWaves.csv")
+
+    heroIndex = MakeHeroIndex(heroes)
+
+    xTrain: List[List[int]] = []
+    yTrain: List[float] = []
+
+    with open(WAVES_PATH, encoding="utf-8", newline="") as file:
+        reader = csv.DictReader(file, delimiter=";")
+
+        for row in reader:
+            team = ParseTeam(row["Team"])
+
+            if len(team) != 3:
+                continue
+
+            if len(set(team)) != 3:
+                continue
+
+            if any(hero not in heroIndex for hero in team):
+                continue
+
+            try:
+                waves = float(row["Result"])
+            except (ValueError, TypeError, KeyError):
+                continue
+
+            xTrain.append(EncodeWavesTeam(team, heroIndex))
+            yTrain.append(waves)
+
+    if not xTrain:
+        raise ValueError("Недостаточно данных для обучения waves_model")
+
+    model = Ridge(alpha=1.0)
+    model.fit(xTrain, yTrain)
+    return model
+
+
 def SaveMetadata(heroes: List[str], bosses: List[str]) -> None:
     metadata = {
         "heroes": heroes,
@@ -230,6 +277,10 @@ def TrainAll() -> None:
     print("Обучение boss_model...")
     bossModel = TrainBossModel(heroes, bosses)
     joblib.dump(bossModel, os.path.join(MODELS_PATH, "boss_model.pkl"))
+
+    print("Обучение waves_model...")
+    wavesModel = TrainWavesModel(heroes)
+    joblib.dump(wavesModel, os.path.join(MODELS_PATH, "waves_model.pkl"))
 
     SaveMetadata(heroes, bosses)
 

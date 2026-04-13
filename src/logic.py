@@ -14,6 +14,7 @@ DUEL_MODEL_PATH = os.path.join(MODELS_PATH, "duel_model.pkl")
 TEAM_MODEL_PATH = os.path.join(MODELS_PATH, "team_model.pkl")
 BOSS_MODEL_PATH = os.path.join(MODELS_PATH, "boss_model.pkl")
 METADATA_PATH = os.path.join(MODELS_PATH, "metadata.json")
+WAVES_MODEL_PATH = os.path.join(MODELS_PATH, "waves_model.pkl")
 
 
 @lru_cache(maxsize=1)
@@ -44,6 +45,13 @@ def LoadBossModel():
     if not os.path.exists(BOSS_MODEL_PATH):
         raise FileNotFoundError("Не найден models/boss_model.pkl. Сначала запусти Training.py")
     return joblib.load(BOSS_MODEL_PATH)
+
+
+@lru_cache(maxsize=1)
+def LoadWavesModel():
+    if not os.path.exists(WAVES_MODEL_PATH):
+        raise FileNotFoundError("Не найден models/waves_model.pkl. Сначала запусти Training.py")
+    return joblib.load(WAVES_MODEL_PATH)
 
 
 def GetHeroes() -> List[str]:
@@ -105,6 +113,16 @@ def EncodeBossBattle(team: List[str], boss: Optional[str]) -> List[int]:
     return features
 
 
+def EncodeWavesTeam(team: List[str]) -> List[int]:
+    heroIndex = MakeHeroIndex()
+    features = [0] * len(heroIndex)
+
+    for hero in team:
+        features[heroIndex[hero]] += 1
+
+    return features
+
+
 def PredictDuel(hero1: str, hero2: str) -> float:
     if hero1 == hero2:
         raise ValueError("Для дуэли нужны два разных героя")
@@ -142,3 +160,17 @@ def PredictBossBattle(team: List[str], boss: Optional[str]) -> float:
     features = EncodeBossBattle(team, boss)
     predictedDamage = model.predict([features])[0]
     return max(0.0, float(predictedDamage))
+
+
+def PredictWaves(team: List[str]) -> float:
+    if len(team) != 3:
+        raise ValueError("Для режима волн нужно выбрать ровно 3 героев")
+
+    if len(set(team)) != len(team):
+        raise ValueError("В команде есть повторяющиеся герои")
+
+    model = LoadWavesModel()
+    features = EncodeWavesTeam(team)
+    predictedWaves = model.predict([features])[0]
+
+    return max(0.0, min(12.0, float(predictedWaves)))

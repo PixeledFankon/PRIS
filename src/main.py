@@ -6,7 +6,8 @@ from logic import (
     GetHeroes,
     PredictBossBattle,
     PredictDuel,
-    PredictTeamBattle
+    PredictTeamBattle,
+    PredictWaves
 )
 
 
@@ -27,7 +28,7 @@ if not heroes:
 
 mode = st.radio(
     "Выбери режим",
-    ["1v1", "3v1 Boss", "3v3 Team Battle"],
+    ["1v1", "3v1 Boss", "3v3 Team Battle", "Waves"],
     horizontal=True
 )
 
@@ -120,5 +121,28 @@ elif mode == "3v3 Team Battle":
 
             st.caption(f"Команда 1: {', '.join(team1)}")
             st.caption(f"Команда 2: {', '.join(team2)}")
+        except Exception as error:
+            st.error(str(error))
+
+elif mode == "Waves":
+    st.subheader("Режим волн")
+
+    team = st.multiselect(
+        "Выбери 3 разных героев",
+        heroes,
+        max_selections=3,
+        key="waves_team"
+    )
+
+    if st.button("Рассчитать волны"):
+        try:
+            if len(team) != 3:
+                st.error("Нужно выбрать ровно 3 героев")
+                st.stop()
+
+            predictedWaves = PredictWaves(team)
+
+            st.metric("Прогнозируемое число волн", f"{predictedWaves:.2f}")
+            st.caption(f"Команда: {', '.join(team)}")
         except Exception as error:
             st.error(str(error))
